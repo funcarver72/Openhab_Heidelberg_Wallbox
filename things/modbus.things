@@ -1,0 +1,44 @@
+// Things file   V3.x.x    7.5.2021
+
+// Configuration for  Heidelberg Wallbox Energy Control
+// Wallbox is slave ID 1
+// Serial Config as in Register Table
+
+Bridge modbus:serial:Modbus_RTU_Slave1_WB [ port="/dev/ttyUSB0", id=1, baud=19200, stopBits="1.0", parity="even", dataBits=8, encoding="rtu", echo=false ] {
+
+    Bridge poller WB_Poll_Reg4to18  [ start=4, length=15, refresh=10000, type="input" ] {
+        Thing data WB_Reg004 [ readStart="4", readValueType="uint16", readTransform="JS(WB_RegVer.js)" ]
+        Thing data WB_Reg005 [ readStart="5", readValueType="uint16", readTransform="JS(WB_CH_State.js)" ]
+        Thing data WB_Reg006 [ readStart="6", readValueType="uint16", readTransform="JS(WB_DIV10.js)" ]
+        Thing data WB_Reg007 [ readStart="7", readValueType="uint16", readTransform="JS(WB_DIV10.js)" ]
+        Thing data WB_Reg008 [ readStart="8", readValueType="uint16", readTransform="JS(WB_DIV10.js)" ]
+        Thing data WB_Reg009 [ readStart="9", readValueType="int16",  readTransform="JS(WB_DIV10.js)" ]
+        Thing data WB_Reg010 [ readStart="10", readValueType="uint16" ]
+        Thing data WB_Reg011 [ readStart="11", readValueType="uint16" ]
+        Thing data WB_Reg012 [ readStart="12", readValueType="uint16" ]
+        Thing data WB_Reg013 [ readStart="13", readValueType="uint16" ]
+        Thing data WB_Reg014 [ readStart="14", readValueType="uint16", readTransform="JS(WB_DIV1000.js)" ]
+        Thing data WB_Reg015 [ readStart="15", readValueType="uint32", readTransform="JS(WB_DIV1000.js)" ]  // Hi and Reg016 as Lo
+        Thing data WB_Reg017 [ readStart="17", readValueType="uint32", readTransform="JS(WB_DIV1000.js)" ]  // Hi and Reg018 as Lo
+    }
+
+    Bridge poller WB_Poll_Reg100to101  [ start=100, length=2, refresh=10000, type="input" ] {
+        Thing data WB_Reg100 [ readStart="100", readValueType="uint16" ]
+        Thing data WB_Reg101 [ readStart="101", readValueType="uint16" ]
+    } 
+
+    Bridge poller WB_Poll_Reg26x [ start=258, length=5, refresh=10000, type="holding" ] {
+        Thing data WB_Reg258 [ readStart="258", readValueType="uint16", writeStart="258", writeValueType="uint16", writeType="holding" ]
+        Thing data WB_Reg259 [ readStart="259", readValueType="uint16", writeStart="259", writeValueType="uint16", writeType="holding" ]
+        // no 260
+        Thing data WB_Reg261 [ readStart="261", readValueType="uint16", writeStart="261", writeValueType="uint16", writeType="holding" ]
+        Thing data WB_Reg262 [ readStart="262", readValueType="uint16", writeStart="262", writeValueType="uint16", writeType="holding" ]
+    }
+
+	
+    // write-only register, no polling
+ 	// Thing data WB_Reg258w [ writeStart="258", writeValueType="uint16", writeType="holding" ]
+    // Thing data WB_Reg259w [ writeStart="259", writeValueType="uint16", writeType="holding" ]
+
+}
+

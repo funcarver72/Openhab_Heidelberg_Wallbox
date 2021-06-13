@@ -1,0 +1,31 @@
+
+Switch SysInit "Trigger für Start Routine" {autoupdate="false"}
+
+// Switch WB_1phase_mode "1-Phasen Ladung L1 [%d]"
+// Switch WB_3phase_mode "3-Phasen Ladung L1L2L3 [%d]" 
+
+String vWB_Currents_L1L2L3
+String vWB_SupplyV_L1L2L3
+
+Switch vCHG_EnergyTarget_en
+Number vCHG_EnergyLimit
+
+Number vCHG_PowerTarget_en
+Number vCHG_PowerLimit
+Number vCHG_Max_I
+
+
+// Timers
+Switch vCHG_StartTime_en
+Number vCHG_StartTime_H   "Std [%d]"
+Number vCHG_StartTime_M   "Min [%d]"
+String vCHG_StartTime_S    <calendar> {autoupdate="false"}
+
+Switch vCHG_StopTime_en 
+Number vCHG_StopTime_H    "Std [%d]"
+Number vCHG_StopTime_M    "Min [%d]"
+String vCHG_StopTime_S    <calendar> {autoupdate="false"}
+
+Switch Go_Charge 
+Number vCHG_EnergyStart      // Energy Count at Start Charging
+Number vCHG_EnergyCharged

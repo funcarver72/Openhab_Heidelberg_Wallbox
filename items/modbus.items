@@ -1,0 +1,25 @@
+// Items file   V3.x.x    7.5.2021
+
+
+String WB_R004_RegLayoutVer     "Version of Register Layout [%S]"   { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg004:string" }    // ro
+String WB_R005_CH_State         "Charging State CAR [%s]"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg005:string" }    // ro
+Number WB_R006_I_L1  			"L1 Current RMS [%.1f]  A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg006:number" }    // ro
+Number WB_R007_I_L2  			"L2 Current RMS [%.1f]  A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg007:number" }    // ro
+Number WB_R008_I_L3  			"L3 Current RMS [%.1f]  A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg008:number" }    // ro
+Number WB_R009_Temp 		    "PCB-Temp [%.1f] °C"    			{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg009:number" }    // ro
+Number WB_R010_V_L1 			"L1 Voltage [%d] V"    				{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg010:number" }    // ro
+Number WB_R011_V_L2 			"L2 Volgage [%d] V"    				{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg011:number" }    // ro
+Number WB_R012_V_L3 			"L3 Voltage [%d] V"    				{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg012:number" }    // ro
+Number WB_R013_Ext_Lock_State 	"External lock State [%d]"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg013:number" }    // ro
+Number WB_R014_PWR_Total 		"Total Power [%.3f] kW"    			{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg014:number" }    // ro
+Number WB_R015_Energy_PwrOn   	"Energy since PowerON [%.3f] kWh"   { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg015:number" }    // ro
+Number WB_R017_Energy_Total 	"Energy Total [%.3f] kWh"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg017:number" }    // ro
+
+Number WB_R100_HW_Max_I     	"HW Setting Max I [%d] A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg100to101:WB_Reg100:number" } // ro
+Number WB_R101_HW_Min_I     	"HW Setting Min I [%d] A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg100to101:WB_Reg101:number" } // ro
+
+Number WB_R258_Standby			"Disable Wallbox Standby [%d]"      { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg26x:WB_Reg258:number" }      // r/w 
+Number WB_R259_RemoteLock    	"Remote Lock [%d]"                  { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg26x:WB_Reg259:number" }      // r/w
+Number WB_R261_Set_Max_I		"Max Charge Current [%d] A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg26x:WB_Reg261:number" }      // r/w
+Number WB_R262_Set_FS_I		    "Set Failsafe Current [%d] A"    	{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg26x:WB_Reg262:number" }      // r/w
+
