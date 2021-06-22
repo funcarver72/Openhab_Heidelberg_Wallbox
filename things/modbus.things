@@ -1,10 +1,15 @@
-// Things file   V3.x.x    7.5.2021
+// Things file   V3.x.x    14.6.2021
 
 // Configuration for  Heidelberg Wallbox Energy Control
-// Wallbox is slave ID 1
+// Wallbox is slave ID 1,  Set by DIP Switch S4-4 to ON
+// MODBUS is connected to LEFT-side terminals on Wallbox PCB
+// Bus-Termination set to ON by DIP Switch S6-2
 // Serial Config as in Register Table
 
-Bridge modbus:serial:Modbus_RTU_Slave1_WB [ port="/dev/ttyUSB0", id=1, baud=19200, stopBits="1.0", parity="even", dataBits=8, encoding="rtu", echo=false ] {
+// For Modbus USB to RTU Interface select this Line
+// Bridge modbus:serial:Modbus_RTU_Slave1_WB [ port="/dev/ttyUSB0", id=1, baud=19200, stopBits="1.0", parity="even", dataBits=8, encoding="rtu", echo=false ] {
+// For Modbus TCP to RTU Using Gateway use this Line:
+Bridge modbus:tcp:Modbus_RTU_Slave1_WB [ host="192.168.2.240", port=502, id=1 ] {
 
     Bridge poller WB_Poll_Reg4to18  [ start=4, length=15, refresh=10000, type="input" ] {
         Thing data WB_Reg004 [ readStart="4", readValueType="uint16", readTransform="JS(WB_RegVer.js)" ]

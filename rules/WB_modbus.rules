@@ -1,5 +1,8 @@
 // Rule File  OpenHAB V3.xx    for Wallbox
 
+var Number ChargingDurationStart     //  save start point in time in millis
+
+
 rule "Rule_WB_Init"
 when
 	System started
@@ -61,32 +64,32 @@ end
 
 
 
-// rule "Rule_Determine_Phases" 
-// when
-//    System started
-//    or Item WB_R010_V_L1 changed
-//    or Item WB_R010_V_L2 changed 
-//    or Item WB_R010_V_L3 changed
-// then 
-//    if ( (WB_R010_V_L1.state < 50) && (WB_R011_V_L2.state < 50) && (WB_R012_V_L3.state < 50) ) {
-//       WB_1phase_mode.sendCommand(OFF)
-//       WB_3phase_mode.sendCommand(OFF)
-//       // send Mail: Wallbox Ausgeschaltet ?
-//    } 
-//    else if ( (WB_R010_V_L1.state > 215) && (WB_R011_V_L2.state < 50) && (WB_R012_V_L3.state < 50) ) {
-//       WB_1phase_mode.sendCommand(ON)
-//       WB_3phase_mode.sendCommand(OFF)
-//    }
-//    else if ( (WB_R010_V_L1.state > 215) && (WB_R011_V_L2.state > 215) && (WB_R012_V_L3.state > 215) ) {
-//       WB_1phase_mode.sendCommand(OFF)
-//       WB_3phase_mode.sendCommand(ON)
-//    } 
-//    else {
-//       WB_1phase_mode.sendCommand(OFF)
-//       WB_3phase_mode.sendCommand(OFF)
-//       // send Mail: Wallbox Unbekannter Versorgungszustand
-//    } 
-// end
+rule "Rule_Determine_Phases" 
+when
+   System started
+   or Item WB_R010_V_L1 changed
+   or Item WB_R010_V_L2 changed 
+   or Item WB_R010_V_L3 changed
+then 
+   if ( (WB_R010_V_L1.state < 50) && (WB_R011_V_L2.state < 50) && (WB_R012_V_L3.state < 50) ) {
+      WB_1phase_mode.sendCommand(OFF)
+      WB_3phase_mode.sendCommand(OFF)
+      // send Mail: Wallbox Ausgeschaltet ?
+   } 
+   else if ( (WB_R010_V_L1.state > 215) && (WB_R011_V_L2.state < 50) && (WB_R012_V_L3.state < 50) ) {
+      WB_1phase_mode.sendCommand(ON)
+      WB_3phase_mode.sendCommand(OFF)
+   }
+   else if ( (WB_R010_V_L1.state > 215) && (WB_R011_V_L2.state > 215) && (WB_R012_V_L3.state > 215) ) {
+      WB_1phase_mode.sendCommand(OFF)
+      WB_3phase_mode.sendCommand(ON)
+   } 
+   else {
+      WB_1phase_mode.sendCommand(OFF)
+      WB_3phase_mode.sendCommand(OFF)
+      // send Mail: Wallbox Unbekannter Versorgungszustand
+   } 
+end
 
 
 rule "Rule_Determine_CHG_Current"
@@ -98,10 +101,8 @@ then
   if (vCHG_PowerTarget_en.state==0)
    vCHG_Max_I.sendCommand(160)                  // max Current 16A
   else if (vCHG_PowerTarget_en.state==1)  {     // Selected Power
-     
-     // var int int_PowerLimit = vCHG_PowerLimit.state.intValue 
-     
-     if (vCHG_PowerLimit.state==2)        vCHG_Max_I.sendCommand(60)     // 29  --> nicht erlaubt.  60   
+          
+     if (vCHG_PowerLimit.state==2)        vCHG_Max_I.sendCommand(60)     // 29  --> nicht erlaubt.  setze 60   
       else if (vCHG_PowerLimit.state==3)  vCHG_Max_I.sendCommand(60)     //  44 nicht erlaubt. setze 60
       else if (vCHG_PowerLimit.state==4)  vCHG_Max_I.sendCommand(60)   
       else if (vCHG_PowerLimit.state==5)  vCHG_Max_I.sendCommand(73)   
@@ -114,7 +115,7 @@ then
 
   }
   else if (vCHG_PowerTarget_en.state==2) {     // PV Überschuss
-      vCHG_Max_I.sendCommand(60)     // Minimum für ON
+      vCHG_Max_I.sendCommand(60)     // Minimum for ON as Starting Value. To be Updated periodically
   }
   else logError("Rule_Determine_CHG_Current", "Unknown Selection of PowerTarget_en")
 
@@ -168,30 +169,29 @@ then
 end
 
 
-// 1. Start Charging
-// Button Start gedrückt
-// Lade-Energie auf 0 gesetzt
-
-// Wenn Start=ON und timer=startzeit dann los.
 rule "Rule_Start_Charging"
 when
    Item Go_Charge received command ON
 then 
-   // vCHG_EnergyCharged.postUpdate(0.0)                             // Charging Energy Counter 0 setzen
-   // vCHG_EnergyStart.postUpdate(WB_R015_Energy_PwrOn)              // Startwert des EnergyCounters sichern
+   vCHG_EnergyCharged.postUpdate(0.0)                                    // Charging Energy Counter 0 setzen
+   vCHG_EnergyStart.postUpdate(WB_R015_Energy_PwrOn.state as Number)     // Startwert des EnergyCounters sichern
+   
+   var String vCurrent = String.format("%.1f", (vCHG_Max_I.state as Number) /10)     // Calculate for Logging
 
    if (vCHG_StartTime_en.state==OFF)  {
       WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number)
-      logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit "+vCHG_Max_I.state.toString+" A")
+      ChargingDurationStart = now.toInstant.toEpochMilli
+      logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit "+vCurrent+" A")
    }
+   else logInfo("Rule_Start_Charging: ", "Laden freigegeben mit "+vCurrent+" A  um " +vCHG_StartTime_S.state+"h")
+
 end 
 
-// rule Minuten Task
-// wenn Zeit = Startzeit und TimerMode=an, dann starten
-// kwh charged updaten
+
+
 rule "Rule_Updates_1min"
 when 
-  Time cron "0 * * * * ?"              // checken jede Minute
+  Time cron "0 * * * * ?"              // trigger every minute
 then
    if (Go_Charge.state==ON) {
 
@@ -203,24 +203,46 @@ then
 	   if (    (vCHG_StartTime_en.state==ON) 
            && (startMinute == now.getMinute() ) 
            && (startStunde == now.getHour() ) 
+         )
       {
-         WB_R261_Set_Max_I.sendCommand(60)            // Beispiel 6A no Timer, start now
-         logInfo("Rule_Updates_1min: ", "Startzeit erreicht: Laden gestartet")
-      }
+         WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number)
+         ChargingDurationStart = now.toInstant.toEpochMilli
+         logInfo("Rule_Updates_1min: ", "Startzeit erreicht: Laden gestartet mit "+vCHG_Max_I.state.toString+"/10 A")
+      }  // end Start Time
 
       if (    (vCHG_StopTime_en.state==ON) 
            && (stopMinute == now.getMinute() ) 
            && (stopStunde == now.getHour() ) 
+         )
       {
-         WB_R261_Set_Max_I.sendCommand(0)             // Laden unterbrechen durch Senden von 0
-         logInfo("Rule_Updates_1min: ", "Stopzeit erreicht: Laden beendet")
-      }
+         logInfo("Rule_Updates_1min: ", "Stopzeit erreicht")
+         Go_Charge.sendCommand(OFF)
+      } // end Stop Time
 
-      // Update kWH erreicht
-      // {
-      //    WB_R261_Set_Max_I.sendCommand(0)             // Laden unterbrechen durch Senden von 0
-      //    logInfo("Rule_Updates_1min: ", "Energy Limit erreicht: Laden beendet")
-      // }
+      // Update Charged Energy Counter
+      var Number E_n_G = (WB_R015_Energy_PwrOn.state as Number) - (vCHG_EnergyStart.state as Number)
+      vCHG_EnergyCharged.postUpdate(E_n_G)
+ 
+      // Manage Energy Target
+      if (vCHG_EnergyTarget_en.state==ON) 
+      { 
+        if (vCHG_EnergyCharged.state >= vCHG_EnergyLimit.state ) 
+        {
+         logInfo("Rule_Updates_1min: ", "Energy Limit reached")
+         Go_Charge.sendCommand(OFF)
+        }
+      }  // End Energy Target
+
+    
+      // Manage PV Power left for Charging    to be completed
+      var Number vCHG_Max_P_new = (OH2Main_ItemSenec_EnergyProduction.state as Number) - ( (OH2Main_ItemSenec_HouseConsumption.state as Number) + (vCHG_PowerLimit.state as Number) )
+
+      if (vCHG_PowerTarget_en.state==2) {
+         // vCHG_Max_I.sendCommand(   )    // to be done 
+         logInfo("Rule_Updates_1min: ", "New Power Limit: "+vCHG_Max_P_new.toString()+" W")   // DEBUG !
+
+      } // PV Power Target
+
    } 
 end
 
@@ -231,8 +253,19 @@ when
    Item Go_Charge received command OFF
 then 
    WB_R261_Set_Max_I.sendCommand(0)             // Laden unterbrechen durch Senden von 0
-   logInfo("Rule_Stop_Charging: ", "Laden beendet")
+   // Calculate Chg Duration
+   val Number CHG_Duration =  now.toInstant.toEpochMilli - ChargingDurationStart  // Differenz in Millisekunden
+   val Number CHG_Minutes = (CHG_Duration / 60000).intValue                  // Duration in Minutes
+   logInfo("Rule_Stop_Charging: ", "Laden beendet, "+(vCHG_EnergyCharged.state as Number)+" kWh geladen in "+(CHG_Minutes).toString+" min")
 end 
+
+
+// rule "Stop_Charging_byCar"   // to be done
+// when
+//  Item WB_R005_CH_State changed
+// then
+// evaluate Car Charging state
+// And stop charging if Car fully Charged
 
 
 
@@ -253,3 +286,4 @@ then
 end
 	 
 // modbus:poller:Modbus_RTU_Slave1_WB:WB_Poll_Reg100to101
+
