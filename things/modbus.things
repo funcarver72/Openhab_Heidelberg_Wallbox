@@ -1,17 +1,17 @@
-// Things file   V3.x.x    14.6.2021
+// Things file for OH3,   V3.x.x    23.6.2021
 
 // Configuration for  Heidelberg Wallbox Energy Control
 // Wallbox is slave ID 1,  Set by DIP Switch S4-4 to ON
 // MODBUS is connected to LEFT-side terminals on Wallbox PCB
 // Bus-Termination set to ON by DIP Switch S6-2
-// Serial Config as in Register Table
+// Serial Config as in Heidelberg's Register Table
 
 // For Modbus USB to RTU Interface select this Line
 // Bridge modbus:serial:Modbus_RTU_Slave1_WB [ port="/dev/ttyUSB0", id=1, baud=19200, stopBits="1.0", parity="even", dataBits=8, encoding="rtu", echo=false ] {
 // For Modbus TCP to RTU Using Gateway use this Line:
 Bridge modbus:tcp:Modbus_RTU_Slave1_WB [ host="192.168.2.240", port=502, id=1 ] {
 
-    Bridge poller WB_Poll_Reg4to18  [ start=4, length=15, refresh=10000, type="input" ] {
+    Bridge poller WB_Poll_Reg4to18  [ start=4, length=15, refresh=6000, type="input" ] {
         Thing data WB_Reg004 [ readStart="4", readValueType="uint16", readTransform="JS(WB_RegVer.js)" ]
         Thing data WB_Reg005 [ readStart="5", readValueType="uint16", readTransform="JS(WB_CH_State.js)" ]
         Thing data WB_Reg006 [ readStart="6", readValueType="uint16", readTransform="JS(WB_DIV10.js)" ]
@@ -27,12 +27,12 @@ Bridge modbus:tcp:Modbus_RTU_Slave1_WB [ host="192.168.2.240", port=502, id=1 ] 
         Thing data WB_Reg017 [ readStart="17", readValueType="uint32", readTransform="JS(WB_DIV1000.js)" ]  // Hi and Reg018 as Lo
     }
 
-    Bridge poller WB_Poll_Reg100to101  [ start=100, length=2, refresh=10000, type="input" ] {
+    Bridge poller WB_Poll_Reg100to101  [ start=100, length=2, refresh=6000, type="input" ] {
         Thing data WB_Reg100 [ readStart="100", readValueType="uint16" ]
         Thing data WB_Reg101 [ readStart="101", readValueType="uint16" ]
     } 
 
-    Bridge poller WB_Poll_Reg26x [ start=258, length=5, refresh=10000, type="holding" ] {
+    Bridge poller WB_Poll_Reg26x [ start=258, length=5, refresh=6000, type="holding" ] {
         Thing data WB_Reg258 [ readStart="258", readValueType="uint16", writeStart="258", writeValueType="uint16", writeType="holding" ]
         Thing data WB_Reg259 [ readStart="259", readValueType="uint16", writeStart="259", writeValueType="uint16", writeType="holding" ]
         // no 260

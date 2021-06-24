@@ -1,41 +1,46 @@
 sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 {
 	Frame label="Actual Charging" {
-		    Switch item=Go_Charge               label="Charging" mappings=[ OFF="  STOP  ", ON="  START  " ]
-			Text item=vCHG_StartTime_S          label="Start Time [%s h]" visibility=[vCHG_StartTime_en==ON ]
+		    Switch item=Go_Charge               label="Charging" icon="switch" mappings=[ OFF="  STOP  ", ON="  START  " ]
+			Text item=vCHG_StartTime_S          label="Start Time [%s h]" icon="time" visibility=[vCHG_StartTime_en==ON ]
+			Text item=vCHG_StopTime_S           label="Stop Time [%s h]" icon="time" visibility=[vCHG_StopTime_en==ON ]
+			Text item=vCHG_EnergyLimit          label="Limit [%d kWh]" icon="energy" visibility=[vCHG_EnergyTarget_en==ON]
 			Text item=WB_R005_CH_State      	label="Charging State CAR [%s]"
-			Text item=vWB_SupplyV_L1L2L3	    label="Supply Voltage L1/L2/L3 [%s]"	
-			Text item=vWB_Currents_L1L2L3	    label="Charging Currents L1/L2/L3 [%s]"
-			Text item=WB_R014_PWR_Total 		label="Total Charging Power [%.3f kW]"
-			Text item=WB_R261_Set_Max_I	        label="Wallbox Max Current Setting [%d /10 A]"
-			Text item=vCHG_EnergyCharged        label="Energy Charged [%.3f kWh]"
+			Text item=WB_R261_Set_Max_I	        label="Wallbox Max Current Setting [%d /10 A]" icon="shield"
+
+			// Text item=WB_1phase_mode			visibility=[WB_1phase_mode==ON]
+		    // Text item=WB_3phase_mode			visibility=[WB_3phase_mode==ON]
+			Text item=vWB_Currents_L1L2L3	    label="Charging Currents L1/L2/L3 [%s]" icon="flow"   visibility=[WB_3phase_mode==ON]
+			Text item=WB_R006_I_L1   	        label="Charging Current L1 only [%.1f A]" icon="flow" visibility=[WB_1phase_mode==ON]
+			Text item=WB_R014_PWR_Total 		label="Total Charging Power [%.3f kW]"  icon="flowpipe"
+			Text item=vCHG_EnergyCharged        label="Energy Charged [%.3f kWh]" icon="returnpipe"
 	}
 
 	Frame label="Heidelberg Wallbox Settings" visibility=[Go_Charge==OFF] {
 			// FULL  /   kWh Limit 
-			Switch item=vCHG_EnergyTarget_en	  label="Energy" mappings=[ OFF="Full", ON="kWh Limit" ]
-			Switch item=vCHG_EnergyLimit          label="Limit [%d kWh]" mappings=[10="10", 20="20", 30="30", 40="40"]  visibility=[vCHG_EnergyTarget_en==ON]
+			Switch item=vCHG_EnergyTarget_en	  label="Energy" icon="energy" mappings=[ OFF="Full", ON="kWh Limit" ] 
+			Switch item=vCHG_EnergyLimit          label="Limit [%d kWh]" icon="energy" mappings=[10="10", 20="20", 30="30", 40="40"]  visibility=[vCHG_EnergyTarget_en==ON]
 
 			// max  /  fixed Limit / PV driven
-			Switch item=vCHG_PowerTarget_en		  label="Power Mode" mappings=[ 0="Max", 1="Set Limit", 2="PV Optimized" ]
-			Setpoint item=vCHG_PowerLimit         label="Power Limit [%d kW]"  minValue=2  maxValue=10  step=1 visibility=[vCHG_PowerTarget_en==1]
+			Switch item=vCHG_PowerTarget_en		  label="Power Mode" icon="flowpipe" mappings=[ 0="Max", 1="Set Limit", 2="PV Optimized" ]
+			Setpoint item=vCHG_PowerLimit         label="Power Limit [%d kW]" icon="flowpipe" minValue=2  maxValue=10  step=1 visibility=[vCHG_PowerTarget_en==1]
 
 
 			// Start Time    OFF / ON  (TIME) 
-			Switch   item=vCHG_StartTime_en   label="CHG Start Time" mappings=[ OFF="now", ON="Start Time" ]
-			Text     item=vCHG_StartTime_S    label="Start Time Setting [%s h]" visibility=[vCHG_StartTime_en==ON] {
-				Setpoint item=vCHG_StartTime_H    label="Start H" minValue=0  maxValue=23  step=1
+			Switch   item=vCHG_StartTime_en   label="CHG Start Time" icon="time" mappings=[ OFF="now", ON="Start Time" ]
+			Text     item=vCHG_StartTime_S    label="Start Time Setting [%s h]" icon="time" visibility=[vCHG_StartTime_en==ON] {
+				Setpoint item=vCHG_StartTime_H    label="Start H" icon="time" minValue=0  maxValue=23  step=1
 				Switch   item=vCHG_StartTime_H    label="#" mappings=[0="00", 6="06", 12="12", 18="18"]
-    			Setpoint item=vCHG_StartTime_M    label="Start M" minValue=0  maxValue=59  step=5
+    			Setpoint item=vCHG_StartTime_M    label="Start M" icon="time" minValue=0  maxValue=59  step=5
     			Switch   item=vCHG_StartTime_M    label="#" mappings=[0="00", 15="15", 30="30", 45="45"]
 			}
     
 			// Stop  Time    OFF / ON  (TIME)
-			Switch  item=vCHG_StopTime_en	  label="CHG Stop Time" mappings=[ OFF="off", ON="Stop Time" ]
-			Text	item=vCHG_StopTime_S	  label="Stop Time Setting [%s h]" visibility=[vCHG_StopTime_en==ON] {
-    			Setpoint item=vCHG_StopTime_H     label="Stop H" minValue=0  maxValue=23  step=1
+			Switch  item=vCHG_StopTime_en	  label="CHG Stop Time" icon="time" mappings=[ OFF="off", ON="Stop Time" ]
+			Text	item=vCHG_StopTime_S	  label="Stop Time Setting [%s h]" icon="time" visibility=[vCHG_StopTime_en==ON] {
+    			Setpoint item=vCHG_StopTime_H     label="Stop H" icon="time" minValue=0  maxValue=23  step=1 
 				Switch   item=vCHG_StopTime_H     label="#" mappings=[0="00", 6="06", 12="12", 18="18"]
-    			Setpoint item=vCHG_StopTime_M     label="Stop M" minValue=0  maxValue=59  step=5
+    			Setpoint item=vCHG_StopTime_M     label="Stop M" icon="time" minValue=0  maxValue=59  step=5
     			Switch   item=vCHG_StopTime_M     label="#" mappings=[0="00", 15="15", 30="30", 45="45"]
 			}
 	}
@@ -49,7 +54,7 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 	// 	Text   item=OH2Main_ItemSenec_BatteryFuelCharge label="Battery fuel charge [%d %unit%]" icon="batterylevel"
 	// 	Text   item=OH2Main_ItemSenec_GridPower label="Power Grid (-Supply / +Draw) [%d %unit%]" icon="energy"
     //  Text   item=OH2Main_ItemSenec_GridPowerSupply label="Grid Power Supply [%d %unit%]" icon="piggybank"
-		
+		Text item=vWB_SupplyV_L1L2L3	    label="Supply Voltage L1/L2/L3 [%s]"	
 		// Text item=WB_R010_V_L1 				label="L1 Voltage [%d V]"    			
 		// Text item=WB_R011_V_L2 				label="L2 Voltage [%d V]"    			
 		// Text item=WB_R012_V_L3 				label="L3 Voltage [%d V]"    			 	
@@ -57,22 +62,24 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 		// Text item=WB_R007_I_L2  				label="L2 Current RMS [%.1f A]"    	
 		// Text item=WB_R008_I_L3  				label="L3 Current RMS [%.1f A]"    	
 
-		Text item=WB_1phase_mode
-		Text item=WB_3phase_mode
-		Text item=WB_R009_Temp 		    		label="Wallbox Temp [%.1f °C]"    		
+		Text item=WB_1phase_mode				visibility=[WB_1phase_mode==ON]
+		Text item=WB_3phase_mode				visibility=[WB_3phase_mode==ON]
+		Text item=WB_R261_Set_Max_I	            label="Wallbox Max Current Setting [%d /10 A]"
 
-		Text label="Admin Commands / Infos" {
+		Text item=WB_R009_Temp 		    		label="Wallbox Temp [%.1f °C]" icon="temperature" 		
+
+		Text label="Admin Commands / Infos" icon="settings" {
 			Text item=WB_R004_RegLayoutVer		label="Version of Register Layout [%s]"
-			Text item=WB_R015_Energy_PwrOn   	label="Energy since PowerON [%.3f kWh]" 
-			Text item=WB_R017_Energy_Total 		label="Energy Total [%.3f kWh]"    	
-			Text item=WB_R100_HW_Max_I     		label="HW Setting Max I [%d A]"    	
-			Text item=WB_R101_HW_Min_I     		label="HW Setting Min I [%d A]"
+			Text item=WB_R015_Energy_PwrOn   	label="Energy since PowerON [%.3f kWh]" icon="energy"
+			Text item=WB_R017_Energy_Total 		label="Energy Total [%.3f kWh]"  icon="energy"  	
+			Text item=WB_R100_HW_Max_I     		label="HW Setting Max I [%d A]"  icon="settings" 
+			Text item=WB_R101_HW_Min_I     		label="HW Setting Min I [%d A]"  icon="settings"
 			  
-			Text item=vCHG_Max_I                label="Charging Current Limit Set Parameter [%d]"  	
-			Switch item=WB_R258_Standby	    	label="Wallbox Standby [%d]"  mappings=[ 0="enabled", 4="disabled" ]    
-			Switch item=WB_R262_Set_FS_I		label="Set Failsafe Current [%d]"  mappings=[ 0="ERR", 60="6A" ] 
-			Text item=WB_R013_Ext_Lock_State 	label="External lock State [%d]"     
-			Switch item=WB_R259_RemoteLock 	    label="Remote lock State [%d]" 	  mappings=[ 0="0", 1="1" ] 
+			Text item=vCHG_Max_I                label="Charging Current Limit Set Parameter [%d]" icon="flowpipe"   	
+			Switch item=WB_R258_Standby	    	label="Wallbox Standby [%d]"  icon="settings" mappings=[ 0="enabled", 4="disabled" ]    
+			Switch item=WB_R262_Set_FS_I		label="Set Failsafe Current [%d]" icon="flowpipe" mappings=[ 0="ERR", 60="6A" ] 
+			Text item=WB_R013_Ext_Lock_State 	label="External lock State [%d]"  icon="lock"  
+			Switch item=WB_R259_RemoteLock 	    label="Remote lock State [%d]" icon="lock"  mappings=[ 0="0", 1="1" ] 
 			Text item=vCHG_EnergyStart          label="Startwert Energiezählung, DEBUG [%.3f kWh]"
 			Switch item=SysInit 				mappings=[ON="Trigger Init Rule"]
 		}

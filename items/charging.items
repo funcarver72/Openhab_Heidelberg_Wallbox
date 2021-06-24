@@ -1,8 +1,8 @@
 
 Switch SysInit "Trigger für Start Routine" {autoupdate="false"}
 
-Switch WB_1phase_mode "1-Phasen Ladung L1 [%d]"
-Switch WB_3phase_mode "3-Phasen Ladung L1L2L3 [%d]" 
+Switch WB_1phase_mode "1-Phase Supply L1 [%s]"
+Switch WB_3phase_mode "3-Phase Supply L1L2L3 [%s]" 
 
 String vWB_Currents_L1L2L3
 String vWB_SupplyV_L1L2L3
@@ -30,7 +30,7 @@ Switch Go_Charge
 Number vCHG_EnergyStart      // Energy Count at Start Charging
 Number vCHG_EnergyCharged
 
-Number vCHG_Car_Select     // Car selection -->  different energy Accounting
+// Number vCHG_Car_Select     // Car selection -->  different energy Accounting, tbd
 
 
 // Connect your own PV here
