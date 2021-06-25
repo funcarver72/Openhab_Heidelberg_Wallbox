@@ -1,7 +1,10 @@
 sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 {
 	Frame label="Actual Charging" {
-		    Switch item=Go_Charge               label="Charging" icon="switch" mappings=[ OFF="  STOP  ", ON="  START  " ]
+		    Switch item=Go_Charge               label="Charging" icon="switch" mappings=[ OFF="  STOP  ", ON="  START  " ] visibility=[vWB_Com_Error==OFF ]
+			Switch item=Go_Charge               label="Charging" icon="switch" mappings=[ OFF="  STOP  " ]                 visibility=[vWB_Com_Error==ON ]
+			Text item=vWB_Com_Error 			label="ModBus Com Error. WB Sleep? [%s]"  icon="siren" 					   visibility=[vWB_Com_Error==ON ]
+
 			Text item=vCHG_StartTime_S          label="Start Time [%s h]" icon="time" visibility=[vCHG_StartTime_en==ON ]
 			Text item=vCHG_StopTime_S           label="Stop Time [%s h]" icon="time" visibility=[vCHG_StopTime_en==ON ]
 			Text item=vCHG_EnergyLimit          label="Limit [%d kWh]" icon="energy" visibility=[vCHG_EnergyTarget_en==ON]
@@ -69,6 +72,7 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 		Text item=WB_R009_Temp 		    		label="Wallbox Temp [%.1f °C]" icon="temperature" 		
 
 		Text label="Admin Commands / Infos" icon="settings" {
+			Text item=vWB_Com_Error 			label="ModBus Com Error. WB Sleep? [%s]"  icon="siren"
 			Text item=WB_R004_RegLayoutVer		label="Version of Register Layout [%s]"
 			Text item=WB_R015_Energy_PwrOn   	label="Energy since PowerON [%.3f kWh]" icon="energy"
 			Text item=WB_R017_Energy_Total 		label="Energy Total [%.3f kWh]"  icon="energy"  	
@@ -79,7 +83,7 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 			Switch item=WB_R258_Standby	    	label="Wallbox Standby [%d]"  icon="settings" mappings=[ 0="enabled", 4="disabled" ]    
 			Switch item=WB_R262_Set_FS_I		label="Set Failsafe Current [%d]" icon="flowpipe" mappings=[ 0="ERR", 60="6A" ] 
 			Text item=WB_R013_Ext_Lock_State 	label="External lock State [%d]"  icon="lock"  
-			Switch item=WB_R259_RemoteLock 	    label="Remote lock State [%d]" icon="lock"  mappings=[ 0="0", 1="1" ] 
+			Text item=WB_R259_RemoteLock 	    label="Remote lock State [%d]" icon="lock"  // mappings=[ 0="0", 1="1" ]
 			Text item=vCHG_EnergyStart          label="Startwert Energiezählung, DEBUG [%.3f kWh]"
 			Switch item=SysInit 				mappings=[ON="Trigger Init Rule"]
 		}

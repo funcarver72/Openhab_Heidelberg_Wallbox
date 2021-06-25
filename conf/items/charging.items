@@ -7,6 +7,8 @@ Switch WB_3phase_mode "3-Phase Supply L1L2L3 [%s]"
 String vWB_Currents_L1L2L3
 String vWB_SupplyV_L1L2L3
 
+Switch vWB_Com_Error
+
 Switch vCHG_EnergyTarget_en
 Number vCHG_EnergyLimit
 

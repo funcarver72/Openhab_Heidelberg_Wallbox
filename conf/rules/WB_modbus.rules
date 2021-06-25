@@ -31,6 +31,7 @@ then
    vCHG_StopTime_en.sendCommand(OFF)
 
    Go_Charge.sendCommand(OFF)
+   
 end 
 
 
@@ -339,15 +340,18 @@ end
 
 rule "Rule_WB_Poller1_Offline"
 when
-    Thing "modbus:poller:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18" changed
+	System started
+or Thing "modbus:poller:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18" changed
 then
 	var Tstatus = getThingStatusInfo("modbus:poller:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18").getStatus()
     if ( (Tstatus.toString == "OFFLINE") || (Tstatus.toString == "UNINITIALIZED" )) 
 	{
+      vWB_Com_Error.sendCommand(ON)
      logError("Rule_WB_Poller1_Offline: ", "ALARM! Poller1 Offline")
 	} else
    if (Tstatus.toString == "ONLINE")  
 	{
+     vWB_Com_Error.sendCommand(OFF)
      logInfo("Rule_WB_Poller1_Offline: ", "Poller1 back Online")
 	}
 end
