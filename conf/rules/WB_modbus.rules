@@ -1,6 +1,7 @@
 // Rule File  OpenHAB V3.xx    for Wallbox
 
 var Number ChargingDurationStart     //  save start point in time in millis
+var Timer tWB_Poll_Reg4to18 = null   //  Delay Timer for Poller Error
 
 
 rule "Rule_WB_Init"
@@ -190,8 +191,8 @@ rule "Rule_Start_Charging"
 when
    Item Go_Charge received command ON
 then 
-   vCHG_EnergyCharged.postUpdate(0.0)                                    // Charging Energy Counter 0 setzen
-   vCHG_EnergyStart.postUpdate(WB_R015_Energy_PwrOn.state as Number)     // Startwert des EnergyCounters sichern
+   vCHG_EnergyCharged.postUpdate(0.0)                                    // Initialize Charging Energy Counter to 0
+   vCHG_EnergyStart.postUpdate(WB_R015_Energy_PwrOn.state as Number)     // Save current value of EnergyCounter
    
    var String vCurrent = String.format("%.1f", (vCHG_Max_I.state as Number) /10)     // Calculate for Logging
 
@@ -200,15 +201,15 @@ then
 
       if (WB_1phase_mode.state==ON) {
         WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number) 
-        logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit L1@ "+vCurrent+" A max")
+        logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit L1@ "+vCurrent+" A max in Mode "+vCHG_PowerTarget_en.state.toString)
       }
       else if (WB_3phase_mode.state==ON) {
         WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number)
-        logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit L1L2L3@ "+vCurrent+" A max")
+        logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit L1L2L3@ "+vCurrent+" A max in Mode "+vCHG_PowerTarget_en.state.toString)
       }
       else logError("Rule_Start_Charging", "ERROR  Supply Power")
    }
-   else logInfo("Rule_Start_Charging: ", "Laden freigegeben mit "+vCurrent+" A  um " +vCHG_StartTime_S.state+"h")
+   else logInfo("Rule_Start_Charging: ", "Laden freigegeben mit "+vCurrent+" A  um " +vCHG_StartTime_S.state+"h in Mode "+vCHG_PowerTarget_en.state.toString)
 
 end 
 
@@ -270,17 +271,19 @@ then
          if (WB_1phase_mode.state==ON) {    // here in 1P mode
             var Number vCHG_I_max_new = (vCHG_Max_P_new / 23).intValue    //  /230 *10   = /23   as direct Set Current Parameter
             if (vCHG_I_max_new < 60) vCHG_I_max_new = 60    // go on charging with minimum Current
-            if (vCHG_I_max_new > 160) vCHG_I_max_new = 160    // Check Limit
-            WB_R261_Set_Max_I.sendCommand(vCHG_I_max_new)
-            logInfo("Rule_Updates_1min: ", "New Power Limit: "+vCHG_Max_P_new.toString()+" W, 1P Current Setting: "+vCHG_I_max_new.toString+" /10 A")   // DEBUG !
+            if (vCHG_I_max_new > 160) vCHG_I_max_new = 160    // Check Limits
+            WB_R261_Set_Max_I.sendCommand(vCHG_I_max_new)     // Update Wallbox setting
+            vCHG_Max_I.sendCommand(vCHG_I_max_new)            // for Logging and Chart
+            // logInfo("Rule_Updates_1min: ", "New Power Limit: "+vCHG_Max_P_new.toString()+" W, 1P Current Setting: "+vCHG_I_max_new.toString+" /10 A")   // DEBUG !
          }
         else 
          if (WB_3phase_mode.state==ON) {  // here in 3P mode
             var Number vCHG_I_max_new = (vCHG_Max_P_new / 69).intValue    //  /230 *10 /3  = /23 /3 = /69  as direct Set Current Parameter
             if (vCHG_I_max_new < 60) vCHG_I_max_new = 60    // go on charging with minimum Current
-            if (vCHG_I_max_new > 160) vCHG_I_max_new = 160    // Check Limit
-            WB_R261_Set_Max_I.sendCommand(vCHG_I_max_new)
-            logInfo("Rule_Updates_1min: ", "New Power Limit: "+vCHG_Max_P_new.toString()+" W, 3P Current Setting: "+vCHG_I_max_new.toString+" /10 A")   // DEBUG !
+            if (vCHG_I_max_new > 160) vCHG_I_max_new = 160    // Check Limits
+            WB_R261_Set_Max_I.sendCommand(vCHG_I_max_new)     // Update Wallbox setting
+            vCHG_Max_I.sendCommand(vCHG_I_max_new)            // for Logging and Chart
+            // logInfo("Rule_Updates_1min: ", "New Power Limit: "+vCHG_Max_P_new.toString()+" W, 3P Current Setting: "+vCHG_I_max_new.toString+" /10 A")   // DEBUG !
          }
       } // PV Power Target
 
@@ -332,7 +335,6 @@ then
 end
 
 
-
 // ------------------------------
 // *** Modbus error handling
 // ------------------------------
@@ -344,15 +346,33 @@ when
 or Thing "modbus:poller:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18" changed
 then
 	var Tstatus = getThingStatusInfo("modbus:poller:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18").getStatus()
-    if ( (Tstatus.toString == "OFFLINE") || (Tstatus.toString == "UNINITIALIZED" )) 
+    if (Tstatus.toString == "OFFLINE")  
 	{
-      vWB_Com_Error.sendCommand(ON)
-     logError("Rule_WB_Poller1_Offline: ", "ALARM! Poller1 Offline")
+      logInfo("Rule_WB_Poller1_Offline: ", "Poller1 Offline-Timer started")   // DEBUG
+      // start delay timer
+      tWB_Poll_Reg4to18 = createTimer(now.plusSeconds(10)) [|
+       {   // after 10s the error is propably real
+    	  vWB_Com_Error.sendCommand(ON)
+        logError("Rule_WB_Poller1_Offline: ", "ALARM! Poller1 Offline")
+    	  tWB_Poll_Reg4to18 = null
+       } ]
 	} else
    if (Tstatus.toString == "ONLINE")  
 	{
+     // cancel timer if running
+     if (tWB_Poll_Reg4to18!==null) { 
+        tWB_Poll_Reg4to18.cancel
+        tWB_Poll_Reg4to18 = null
+        logInfo("Rule_WB_Poller1_Offline: ", "Poller1 Offline-Timer aborted")   // DEBUG
+     }
+
      vWB_Com_Error.sendCommand(OFF)
-     logInfo("Rule_WB_Poller1_Offline: ", "Poller1 back Online")
+     logInfo("Rule_WB_Poller1_Offline: ", "Poller1 Online")
+	} else
+   if (Tstatus.toString == "UNINITIALIZED")  
+	{
+     vWB_Com_Error.sendCommand(ON)
+     logInfo("Rule_WB_Poller1_Offline: ", "Poller1 Uninitialized")
 	}
 end
 	 

@@ -10,12 +10,20 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 			Text item=vCHG_EnergyLimit          label="Limit [%d kWh]" icon="energy" visibility=[vCHG_EnergyTarget_en==ON]
 			Text item=WB_R005_CH_State      	label="Charging State CAR [%s]"
 			Text item=WB_R261_Set_Max_I	        label="Wallbox Max Current Setting [%d /10 A]" icon="shield"
-
+			Text 								label="Max Power Mode" 		visibility=[vCHG_PowerTarget_en==0]
+			Text 								label="Limited Power Mode" 	visibility=[vCHG_PowerTarget_en==1]
+			Text 								label="PV Optimized Mode" 	visibility=[vCHG_PowerTarget_en==2]
 			// Text item=WB_1phase_mode			visibility=[WB_1phase_mode==ON]
 		    // Text item=WB_3phase_mode			visibility=[WB_3phase_mode==ON]
 			Text item=vWB_Currents_L1L2L3	    label="Charging Currents L1/L2/L3 [%s]" icon="flow"   visibility=[WB_3phase_mode==ON]
 			Text item=WB_R006_I_L1   	        label="Charging Current L1 only [%.1f A]" icon="flow" visibility=[WB_1phase_mode==ON]
-			Text item=WB_R014_PWR_Total 		label="Total Charging Power [%.3f kW]"  icon="flowpipe"
+			Text item=WB_R014_PWR_Total 		label="Total Charging Power [%.3f kW]"  icon="flowpipe" {
+				Switch item=Chart_Period_WB_PWR_Total label="View" mappings=[0="Stunde", 1="8h", 2="Tag", 3="Woche"]
+				Chart item=Chart_WB_PWR_Total period=h  refresh=60000  visibility=[Chart_Period_WB_PWR_Total==0, Chart_Period_WB_PWR_Total=="Uninitialized"]
+				Chart item=Chart_WB_PWR_Total period=8h refresh=300000 visibility=[Chart_Period_WB_PWR_Total==1]
+				Chart item=Chart_WB_PWR_Total period=D  refresh=300000 visibility=[Chart_Period_WB_PWR_Total==2]
+				Chart item=Chart_WB_PWR_Total period=W  refresh=300000 visibility=[Chart_Period_WB_PWR_Total==3]	
+			}
 			Text item=vCHG_EnergyCharged        label="Energy Charged [%.3f kWh]" icon="returnpipe"
 	}
 
@@ -79,7 +87,13 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 			Text item=WB_R100_HW_Max_I     		label="HW Setting Max I [%d A]"  icon="settings" 
 			Text item=WB_R101_HW_Min_I     		label="HW Setting Min I [%d A]"  icon="settings"
 			  
-			Text item=vCHG_Max_I                label="Charging Current Limit Set Parameter [%d]" icon="flowpipe"   	
+			Text item=vCHG_Max_I                label="Charging Current Limit Set Parameter [%d]" icon="flowpipe" {
+				Switch item=Chart_Period_vCHG_Max_I label="View" mappings=[0="Stunde", 1="8h", 2="Tag", 3="Woche"]
+				Chart item=Chart_vCHG_Max_I period=h  refresh=60000  visibility=[Chart_Period_vCHG_Max_I==0, Chart_Period_vCHG_Max_I=="Uninitialized"]
+				Chart item=Chart_vCHG_Max_I period=8h refresh=300000 visibility=[Chart_Period_vCHG_Max_I==1]
+				Chart item=Chart_vCHG_Max_I period=D  refresh=300000 visibility=[Chart_Period_vCHG_Max_I==2]
+				Chart item=Chart_vCHG_Max_I period=W  refresh=300000 visibility=[Chart_Period_vCHG_Max_I==3]	
+			}   	
 			Switch item=WB_R258_Standby	    	label="Wallbox Standby [%d]"  icon="settings" mappings=[ 0="enabled", 4="disabled" ]    
 			Switch item=WB_R262_Set_FS_I		label="Set Failsafe Current [%d]" icon="flowpipe" mappings=[ 0="ERR", 60="6A" ] 
 			Text item=WB_R013_Ext_Lock_State 	label="External lock State [%d]"  icon="lock"  

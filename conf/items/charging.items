@@ -1,5 +1,16 @@
 
-Switch SysInit "Trigger für Start Routine" {autoupdate="false"}
+// Groups for Charts 
+Group Chart_Period                  (All)
+
+Group Chart_vCHG_Max_I            	// Wallbox Max Current Setting
+Number Chart_Period_vCHG_Max_I		<settings> (Chart_Period)
+
+Group Chart_WB_PWR_Total
+Number Chart_Period_WB_PWR_Total	<settings> (Chart_Period)
+
+// -------------------------------------------
+
+Switch SysInit "Trigger for Start Routine" {autoupdate="false"}
 
 Switch WB_1phase_mode "1-Phase Supply L1 [%s]"
 Switch WB_3phase_mode "3-Phase Supply L1L2L3 [%s]" 
@@ -14,7 +25,7 @@ Number vCHG_EnergyLimit
 
 Number vCHG_PowerTarget_en
 Number vCHG_PowerLimit
-Number vCHG_Max_I
+Number vCHG_Max_I           (Chart_vCHG_Max_I)            // Add item to corresponding chart
 
 
 // Timers
