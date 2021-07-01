@@ -33,6 +33,7 @@ In case of Wallbox standby the modbus stops working and the pollers
 go to an Error state and report frequently errors to the log-file.
 
 This can be turned OFF by following command sequence on the OpenHAB Karaf Console:
+
 openhab> log:set OFF org.openhab.core.io.transport.modbus
 
 The user interface detects the error state and blocks the start of Charging.
