@@ -58,7 +58,7 @@ Combination of options is possible, First occurring event stops the charging.
 The rules detect whether the wallbox is used in 1-phase or 3-phase supply mode.
 
 
-Testing and qualificaton status:
+Testing and qualification status:
 ---------------------------------
 
 Modbus communication runs stable in my setup
@@ -70,6 +70,6 @@ Interaction with Car  NOT YET tested  (no car avail.).
 Disclaimer:
 ------------
 Please read the manual of the Wallbox and follow all instructions, especially safety instructions.
-I just share the status of my project - I am not responsible for any mis-use or damages.
+I just share the status of my project - I am not responsible for any misuse or damages.
 
 
