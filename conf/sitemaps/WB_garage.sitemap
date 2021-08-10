@@ -1,14 +1,15 @@
 sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 {
 	Frame label="Actual Charging" {
-		    Switch item=Go_Charge               label="Charging" icon="switch" mappings=[ OFF="  STOP  ", ON="  START  " ] visibility=[vWB_Com_Error==OFF ]
-			Switch item=Go_Charge               label="Charging" icon="switch" mappings=[ OFF="  STOP  " ]                 visibility=[vWB_Com_Error==ON ]
-			Text item=vWB_Com_Error 			label="ModBus Com Error. WB Sleep? [%s]"  icon="siren" 					   visibility=[vWB_Com_Error==ON ]
+		    Switch item=WB_Release              label="Charging" icon="switch" mappings=[ OFF=" Lock ", ON="Release" ]  visibility=[vWB_Com_Error==OFF ]
+			Switch item=WB_Release              label="Charging" icon="switch" mappings=[ OFF=" Lock " ]                visibility=[vWB_Com_Error==ON ]
+			Text item=vWB_Com_Error 			label="ModBus Com Error. WB Sleep? [%s]"  icon="siren" 					visibility=[vWB_Com_Error==ON ]
 
 			Text item=vCHG_StartTime_S          label="Start Time [%s h]" icon="time" visibility=[vCHG_StartTime_en==ON ]
 			Text item=vCHG_StopTime_S           label="Stop Time [%s h]" icon="time" visibility=[vCHG_StopTime_en==ON ]
 			Text item=vCHG_EnergyLimit          label="Limit [%d kWh]" icon="energy" visibility=[vCHG_EnergyTarget_en==ON]
-			Text item=WB_R005_CH_State      	label="Charging State CAR [%s]"
+			Text item=WB_R005_CH_State      	label="CAR State [%s]"
+			Text item=vCHG_ChargeDuration		label="Charging Time [JS(WB_minConvert.js):%s]" icon="clock"
 			Text item=WB_R261_Set_Max_I	        label="Wallbox Max Current Setting [%d /10 A]" icon="shield"
 			Text 								label="Max Power Mode" 		visibility=[vCHG_PowerTarget_en==0]
 			Text 								label="Limited Power Mode" 	visibility=[vCHG_PowerTarget_en==1]
@@ -25,9 +26,10 @@ sitemap WB_garage label="OH3 Sitemap Garage - Hauptmenü"
 				Chart item=Chart_WB_PWR_Total period=W  refresh=300000 visibility=[Chart_Period_WB_PWR_Total==3]	
 			}
 			Text item=vCHG_EnergyCharged        label="Energy Charged [%.3f kWh]" icon="returnpipe"
+			Text item=WB_R009_Temp_LastUpdate   label="Last Status Update (5s) [%1$tF %1$tT]" icon="clock"
 	}
 
-	Frame label="Heidelberg Wallbox Settings" visibility=[Go_Charge==OFF] {
+	Frame label="Heidelberg Wallbox Settings" visibility=[WB_Release==OFF] {
 			// FULL  /   kWh Limit 
 			Switch item=vCHG_EnergyTarget_en	  label="Energy" icon="energy" mappings=[ OFF="Full", ON="kWh Limit" ] 
 			Switch item=vCHG_EnergyLimit          label="Limit [%d kWh]" icon="energy" mappings=[10="10", 20="20", 30="30", 40="40"]  visibility=[vCHG_EnergyTarget_en==ON]

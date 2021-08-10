@@ -39,9 +39,11 @@ Number vCHG_StopTime_H    "Std [%d]"
 Number vCHG_StopTime_M    "Min [%d]"
 String vCHG_StopTime_S    <calendar> {autoupdate="false"}
 
-Switch Go_Charge 
+Switch Go_Charge
+Switch WB_Release            // Bedienbutton für WB:  Lock / Release
 Number vCHG_EnergyStart      // Energy Count at Start Charging
 Number vCHG_EnergyCharged
+Number vCHG_ChargeDuration
 
 // Number vCHG_Car_Select     // Car selection -->  different energy Accounting, tbd
 

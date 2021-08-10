@@ -1,4 +1,5 @@
-// Items file   V3.x.x    7.5.2021
+// Items file for OH3   V3.x.x    7.5.2021
+// for Heidelberg Energy Control Wallbox over ModBus
 
 
 String WB_R004_RegLayoutVer     "Version of Register Layout [%S]"   { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg004:string" }    // ro
@@ -7,11 +8,13 @@ Number WB_R006_I_L1  			"L1 Current RMS [%.1f]  A"    		{ channel="modbus:data:M
 Number WB_R007_I_L2  			"L2 Current RMS [%.1f]  A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg007:number" }    // ro
 Number WB_R008_I_L3  			"L3 Current RMS [%.1f]  A"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg008:number" }    // ro
 Number WB_R009_Temp 		    "PCB-Temp [%.1f] °C"    			{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg009:number" }    // ro
+DateTime WB_R009_Temp_LastUpdate "Last Status Update [%1$tF %1$tR]" { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg009:number" [profile="timestamp-update"] }
 Number WB_R010_V_L1 			"L1 Voltage [%d] V"    				{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg010:number" }    // ro
 Number WB_R011_V_L2 			"L2 Volgage [%d] V"    				{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg011:number" }    // ro
 Number WB_R012_V_L3 			"L3 Voltage [%d] V"    				{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg012:number" }    // ro
 Number WB_R013_Ext_Lock_State 	"External lock State [%d]"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg013:number" }    // ro
-Number WB_R014_PWR_Total 		"Total Power [%.3f] kW"    			{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg014:number" }    // ro
+Number WB_R014_PWR_Total 		"Total Power [%.3f] kW"    	(Chart_WB_PWR_Total)    // Group member to draw value in a chart 
+                                                                    { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg014:number" }    // ro
 Number WB_R015_Energy_PwrOn   	"Energy since PowerON [%.3f] kWh"   { channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg015:number" }    // ro
 Number WB_R017_Energy_Total 	"Energy Total [%.3f] kWh"    		{ channel="modbus:data:Modbus_RTU_Slave1_WB:WB_Poll_Reg4to18:WB_Reg017:number" }    // ro
 

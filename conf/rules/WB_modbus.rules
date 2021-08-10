@@ -32,6 +32,9 @@ then
    vCHG_StopTime_en.sendCommand(OFF)
 
    Go_Charge.sendCommand(OFF)
+   WB_Release.sendCommand(OFF)
+
+   vCHG_ChargeDuration.sendCommand(0)
    
 end 
 
@@ -187,12 +190,13 @@ then
 end
 
 
-rule "Rule_Start_Charging"
+rule "Rule_Go_Charge"
 when
-   Item Go_Charge received command ON
+   Item Go_Charge received command ON                                    // only triggered in State C1
 then 
    vCHG_EnergyCharged.postUpdate(0.0)                                    // Initialize Charging Energy Counter to 0
    vCHG_EnergyStart.postUpdate(WB_R015_Energy_PwrOn.state as Number)     // Save current value of EnergyCounter
+   vCHG_ChargeDuration.postUpdate(0)                                     // Item Ladedauer
    
    var String vCurrent = String.format("%.1f", (vCHG_Max_I.state as Number) /10)     // Calculate for Logging
 
@@ -201,15 +205,15 @@ then
 
       if (WB_1phase_mode.state==ON) {
         WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number) 
-        logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit L1@ "+vCurrent+" A max in Mode "+vCHG_PowerTarget_en.state.toString)
+        logInfo("Rule_Go_Charge: ", "Laden jetzt freigegeben mit L1@ "+vCurrent+" A max in Mode "+vCHG_PowerTarget_en.state.toString)
       }
       else if (WB_3phase_mode.state==ON) {
         WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number)
-        logInfo("Rule_Start_Charging: ", "Laden jetzt freigegeben mit L1L2L3@ "+vCurrent+" A max in Mode "+vCHG_PowerTarget_en.state.toString)
+        logInfo("Rule_Go_Charge: ", "Laden jetzt freigegeben mit L1L2L3@ "+vCurrent+" A max in Mode "+vCHG_PowerTarget_en.state.toString)
       }
-      else logError("Rule_Start_Charging", "ERROR  Supply Power")
+      else logError("Rule_Go_Charge", "ERROR  Supply Power")
    }
-   else logInfo("Rule_Start_Charging: ", "Laden freigegeben mit "+vCurrent+" A  um " +vCHG_StartTime_S.state+"h in Mode "+vCHG_PowerTarget_en.state.toString)
+   else logInfo("Rule_Go_Charge: ", "Laden freigegeben mit "+vCurrent+" A  um " +vCHG_StartTime_S.state+"h in Mode "+vCHG_PowerTarget_en.state.toString)
 
 end 
 
@@ -226,6 +230,7 @@ then
       var int stopMinute = (vCHG_StopTime_M.state as DecimalType).intValue
 	   var int stopStunde = (vCHG_StopTime_H.state as DecimalType).intValue
 
+      // Start Timer
 	   if (    (vCHG_StartTime_en.state==ON) 
            && (startMinute == now.getMinute() ) 
            && (startStunde == now.getHour() ) 
@@ -234,25 +239,31 @@ then
          WB_R261_Set_Max_I.sendCommand(vCHG_Max_I.state as Number)
          ChargingDurationStart = now.toInstant.toEpochMilli
          logInfo("Rule_Updates_1min: ", "Startzeit erreicht: Laden gestartet mit "+vCHG_Max_I.state.toString+"/10 A")
-      }  // end Start Time
+      }  // end Start Timer
 
+      // Stop Timer
       if (    (vCHG_StopTime_en.state==ON) 
            && (stopMinute == now.getMinute() ) 
            && (stopStunde == now.getHour() ) 
          )
       {
-         logInfo("Rule_Updates_1min: ", "Stop Time reached")
+         logInfo("Rule_Updates_1min: ", "Stop Time erreicht")
          Go_Charge.sendCommand(OFF)
-      } // end Stop Time
+      } // end Stop Timer
 
       // Update Charged Energy Counter
       var Number E_n_G = (WB_R015_Energy_PwrOn.state as Number) - (vCHG_EnergyStart.state as Number)
       vCHG_EnergyCharged.postUpdate(E_n_G)
  
+      // Update Duration Timer
+      val Number CHG_Duration =  now.toInstant.toEpochMilli - ChargingDurationStart  // Differenz in Millisekunden
+      val Number CHG_Minutes = (CHG_Duration / 60000).intValue                  // Duration in Minutes
+      vCHG_ChargeDuration.postUpdate(CHG_Minutes)
+
       // Manage Energy Target
       if (vCHG_EnergyTarget_en.state==ON) 
       { 
-        if (vCHG_EnergyCharged.state >= vCHG_EnergyLimit.state ) 
+        if (vCHG_EnergyCharged.state >= (vCHG_EnergyLimit.state as Number) ) 
         {
          logInfo("Rule_Updates_1min: ", "Energy Limit reached")
          Go_Charge.sendCommand(OFF)
@@ -300,19 +311,17 @@ then
    // Calculate Chg Duration
    val Number CHG_Duration =  now.toInstant.toEpochMilli - ChargingDurationStart  // Differenz in Millisekunden
    val Number CHG_Minutes = (CHG_Duration / 60000).intValue                  // Duration in Minutes
+   vCHG_ChargeDuration.postUpdate(CHG_Minutes)
    logInfo("Rule_Stop_Charging: ", "Laden beendet, "+(vCHG_EnergyCharged.state as Number)+" kWh geladen in "+(CHG_Minutes).toString+" min")
 end 
 
 
 rule "Rule_State_Car_disconnected"
 when
-   Item WB_R005_CH_State changed from "B1" to "A1"
-or Item WB_R005_CH_State changed from "C1" to "A1"
-or Item WB_R005_CH_State changed from "B2" to "A2"
-or Item WB_R005_CH_State changed from "C2" to "A2"
+   Item WB_R005_CH_State changed to "A1"
 then
-   Go_Charge.sendCommand(OFF)
-   logInfo("Rule_State_Car_disconnected: ", "Car disconnected")
+   if (Go_Charge.state==ON) Go_Charge.sendCommand(OFF)
+   logInfo("Rule_State_Car_disconnected: ", "A1: Car disconnected")
 end
 
 rule "Rule_State_Car_Error"
@@ -326,13 +335,52 @@ end
 rule "Rule_State_Car_connected"
 when
    Item WB_R005_CH_State changed from "A1" to "B1"
-or Item WB_R005_CH_State changed from "A1" to "C1"
-or Item WB_R005_CH_State changed from "A2" to "B2"
-or Item WB_R005_CH_State changed from "A2" to "C2"
+or Item WB_R005_CH_State changed from "A1" to "B2"
 then
-   // Go_Charge.sendCommand(ON)        // decide on automatic start
-   logInfo("Rule_State_Car_connected: ", "Car connected")
+   logInfo("Rule_State_Car_connected: ", "B1/B2: Car connected")
 end
+
+rule "Rule_State_Car_ready"
+when
+   Item WB_R005_CH_State changed from "B1" to "C1"
+   or Item WB_R005_CH_State changed from "A1" to "C1"
+then
+   logInfo("Rule_State_Car_ready: ", "C1: Car ready for Charging")
+   if (WB_Release.state==ON) {
+     Go_Charge.sendCommand(ON)       
+     logInfo("Rule_State_Car_ready: ", "WB Released Charging:  C1 --> C2")
+   }
+end
+
+rule "Rule_State_Car_done"
+when
+   Item WB_R005_CH_State changed from "C2" to "B2"
+then
+   logInfo("Rule_State_Car_ready: ", "B2: Car terminated charging")
+   if (WB_Release.state==ON) {
+      Go_Charge.sendCommand(OFF)
+      logInfo("Rule_State_Car_done: ", "Stop Charging:  C2 --> B2 --> B1")
+   }
+end
+
+rule "Rule_State_WB_lock"
+when
+   Item WB_Release changed to OFF
+then
+   logInfo("Rule_State_WB_lock: ", "Wallbox locked, Charging Stopped")
+   Go_Charge.sendCommand(OFF)
+end
+
+rule "Rule_State_WB_Release"
+when
+   Item WB_Release changed to ON
+then
+   logInfo("Rule_State_WB_Release: ", "Wallbox Released, Charging Possible")
+   if (WB_R005_CH_State.state=="C1")   Go_Charge.sendCommand(ON)
+end
+
+
+
 
 
 // ------------------------------
